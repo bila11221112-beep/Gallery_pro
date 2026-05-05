@@ -1,0 +1,23 @@
+{
+    "name": "Private Gallery Pro",
+    "short_name": "Gallery Pro",
+    "description": "Secure private gallery with photo editing",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#667eea",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": ["photo", "video", "utilities"]
+}

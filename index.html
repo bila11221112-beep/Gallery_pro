@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="Private Gallery App - Secure your memories">
+    <title>Private Gallery Pro</title>
+    
+    <!-- Manifest for PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Cropper.js for image editing -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-content">
+            <i class="fas fa-shield-alt splash-icon"></i>
+            <h1>Private Gallery Pro</h1>
+            <div class="loading-bar">
+                <div class="loading-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span class="toast-message"></span>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer" style="display: none;">
+        
+        <!-- ==================== AUTH SCREEN ==================== -->
+        <div class="auth-screen active" id="authScreen">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-icon">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    <h2>Private Gallery</h2>
+                    <p>Secure your precious memories</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Login</button>
+                    <button class="auth-tab" data-tab="signup">Sign Up</button>
+                </div>
+                
+                <form class="auth-form" id="authForm" autocomplete="off">
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="usernameInput" placeholder="Username" required>
+                    </div>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="passwordInput" placeholder="Password" required>
+                        <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                    </div>
+                    
+                    <div class="fingerprint-section" id="fingerprintSection" style="display: none;">
+                        <button type="button" class="fingerprint-btn" id="fingerprintBtn">
+                            <i class="fas fa-fingerprint"></i>
+                            <span>Use Fingerprint</span>
+                        </button>
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary btn-block" id="authActionBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    
+                    <p class="auth-error" id="authError"></p>
+                    <p class="auth-success" id="authSuccess"></p>
+                </form>
+                
+                <div class="theme-selector">
+                    <span>Theme:</span>
+                    <button class="theme-btn" data-theme="dark" title="Dark">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button class="theme-btn active" data-theme="purple" title="Purple">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <button class="theme-btn" data-theme="ocean" title="Ocean">
+                        <i class="fas fa-water"></i>
+                    </button>
+                    <button class="theme-btn" data-theme="sunset" title="Sunset">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== GALLERY SCREEN ==================== -->
+        <div class="gallery-screen" id="galleryScreen">
+            <!-- Top Navigation -->
+            <nav class="top-nav">
+                <div class="nav-left">
+                    <button class="icon-btn" id="menuBtn" title="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar">U</div>
+                        <div>
+                            <strong id="currentUsername">User</strong>
+                            <small id="storageInfo">0 MB used</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <button class="icon-btn" id="searchBtn" title="Search">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="icon-btn" id="gridViewBtn" title="Grid View">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="icon-btn" id="listViewBtn" title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="search-bar" id="searchBar" style="display: none;">
+                    <input type="text" placeholder="Search photos..." id="searchInput">
+                    <button class="icon-btn" id="closeSearch">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </nav>
+
+            <!-- Sidebar Menu -->
+            <div class="sidebar-overlay" id="sidebarOverlay"></div>
+            <div class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h3>Menu</h3>
+                    <button class="icon-btn" id="closeSidebar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <ul class="sidebar-menu">
+                    <li class="active" data-view="all">
+                        <i class="fas fa-images"></i> All Photos
+                    </li>
+                    <li data-view="videos">
+                        <i class="fas fa-video"></i> Videos
+                    </li>
+                    <li data-view="favorites">
+                        <i class="fas fa-heart"></i> Favorites
+                    </li>
+                    <li class="divider"></li>
+                    <li id="albumListTitle">
+                        <i class="fas fa-folder"></i> Albums
+                    </li>
+                    <div id="albumList"></div>
+                    <li id="createAlbumBtn">
+                        <i class="fas fa-plus-circle"></i> Create Album
+                    </li>
+                    <li class="divider"></li>
+                    <li id="backupBtn">
+                        <i class="fas fa-cloud-upload-alt"></i> Google Drive Backup
+                    </li>
+                    <li id="restoreBtn">
+                        <i class="fas fa-cloud-download-alt"></i> Restore Backup
+                    </li>
+                    <li class="divider"></li>
+                    <li id="settingsBtn">
+                        <i class="fas fa-cog"></i> Settings
+                    </li>
+                    <li id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="content-area">
+                <!-- Album Bar -->
+                <div class="album-bar" id="albumBar">
+                    <div class="album-scroll" id="albumScroll">
+                        <button class="album-chip active" data-album="all">
+                            <i class="fas fa-images"></i> All
+                        </button>
+                        <button class="album-chip" data-album="videos">
+                            <i class="fas fa-video"></i> Videos
+                        </button>
+                        <button class="album-chip" data-album="favorites">
+                            <i class="fas fa-heart"></i> Favorites
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Upload Floating Button -->
+                <button class="fab" id="fabUpload" title="Upload">
+                    <i class="fas fa-plus"></i>
+                </button>
+
+                <!-- Upload Options Menu -->
+                <div class="upload-menu" id="uploadMenu" style="display: none;">
+                    <button id="uploadPhotosBtn">
+                        <i class="fas fa-camera"></i> Photos
+                    </button>
+                    <button id="uploadVideosBtn">
+                        <i class="fas fa-video"></i> Videos
+                    </button>
+                    <button id="takePhotoBtn">
+                        <i class="fas fa-camera-retro"></i> Take Photo
+                    </button>
+                    <button id="recordVideoBtn">
+                        <i class="fas fa-record-vinyl"></i> Record Video
+                    </button>
+                </div>
+
+                <!-- Hidden File Inputs -->
+                <input type="file" id="photoInput" accept="image/*" multiple hidden>
+                <input type="file" id="videoInput" accept="video/*" multiple hidden>
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+                <input type="file" id="videoCameraInput" accept="video/*" capture="environment" hidden>
+
+                <!-- Gallery Grid -->
+                <div class="gallery-grid" id="galleryGrid">
+                    <div class="empty-state">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>No Media Yet</h3>
+                        <p>Tap the + button to add photos and videos</p>
+                    </div>
+                </div>
+
+                <!-- List View -->
+                <div class="gallery-list" id="galleryList" style="display: none;">
+                    <div class="empty-state">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>No Media Yet</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PHOTO EDITOR ==================== -->
+        <div class="editor-screen" id="editorScreen" style="display: none;">
+            <div class="editor-header">
+                <button class="icon-btn" id="editorBackBtn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3>Edit Photo</h3>
+                <button class="btn btn-small btn-primary" id="saveEditedBtn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+            
+            <div class="editor-container">
+                <div class="editor-image-container">
+                    <img id="editorImage" src="" alt="Edit">
+                </div>
+                
+                <div class="editor-tools">
+                    <button class="tool-btn active" data-tool="crop">
+                        <i class="fas fa-crop"></i>
+                        <span>Crop</span>
+                    </button>
+                    <button class="tool-btn" data-tool="rotate">
+                        <i class="fas fa-redo"></i>
+                        <span>Rotate</span>
+                    </button>
+                    <button class="tool-btn" data-tool="flip">
+                        <i class="fas fa-arrows-alt-h"></i>
+                        <span>Flip</span>
+                    </button>
+                    <button class="tool-btn" data-tool="filter">
+                        <i class="fas fa-magic"></i>
+                        <span>Filters</span>
+                    </button>
+                    <button class="tool-btn" data-tool="brightness">
+                        <i class="fas fa-sun"></i>
+                        <span>Adjust</span>
+                    </button>
+                    <button class="tool-btn" data-tool="text">
+                        <i class="fas fa-font"></i>
+                        <span>Text</span>
+                    </button>
+                    <button class="tool-btn" data-tool="draw">
+                        <i class="fas fa-pen"></i>
+                        <span>Draw</span>
+                    </button>
+                    <button class="tool-btn" data-tool="sticker">
+                        <i class="fas fa-sticky-note"></i>
+                        <span>Sticker</span>
+                    </button>
+                </div>
+
+                <!-- Filter Options -->
+                <div class="filter-options" id="filterOptions" style="display: none;">
+                    <div class="filter-scroll">
+                        <button class="filter-item" data-filter="none">
+                            <img src="data:image/svg+xml,..." alt="Normal">
+                            <span>Normal</span>
+                        </button>
+                        <button class="filter-item" data-filter="grayscale">
+                            <span>B&W</span>
+                        </button>
+                        <button class="filter-item" data-filter="sepia">
+                            <span>Sepia</span>
+                        </button>
+                        <button class="filter-item" data-filter="invert">
+                            <span>Invert</span>
+                        </button>
+                        <button class="filter-item" data-filter="blur">
+                            <span>Blur</span>
+                        </button>
+                        <button class="filter-item" data-filter="vintage">
+                            <span>Vintage</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Adjustment Sliders -->
+                <div class="adjustment-sliders" id="adjustmentSliders" style="display: none;">
+                    <div class="slider-group">
+                        <label>Brightness</label>
+                        <input type="range" id="brightnessSlider" min="0" max="200" value="100">
+                        <span id="brightnessValue">100%</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Contrast</label>
+                        <input type="range" id="contrastSlider" min="0" max="200" value="100">
+                        <span id="contrastValue">100%</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Saturation</label>
+                        <input type="range" id="saturationSlider" min="0" max="200" value="100">
+                        <span id="saturationValue">100%</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Blur</label>
+                        <input type="range" id="blurSlider" min="0" max="10" value="0">
+                        <span id="blurValue">0px</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== VIDEO PLAYER ==================== -->
+        <div class="video-player" id="videoPlayer" style="display: none;">
+            <div class="video-header">
+                <button class="icon-btn" id="videoBackBtn">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h3>Video Player</h3>
+            </div>
+            <video id="videoElement" controls playsinline>
+                Your browser does not support video.
+            </video>
+            <div class="video-info">
+                <p id="videoName"></p>
+                <p id="videoSize"></p>
+            </div>
+        </div>
+
+        <!-- ==================== LIGHTBOX ==================== -->
+        <div class="lightbox" id="lightbox">
+            <div class="lightbox-header">
+                <button class="icon-btn" id="lightboxClose">
+                    <i class="fas fa-times"></i>
+                </button>
+                <button class="icon-btn" id="lightboxEdit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="icon-btn" id="lightboxFavorite">
+                    <i class="far fa-heart"></i>
+                </button>
+                <button class="icon-btn" id="lightboxShare">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+                <button class="icon-btn" id="lightboxDelete">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <img id="lightboxImg" src="" alt="Preview">
+            <div class="lightbox-nav">
+                <button class="icon-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="icon-btn" id="nextBtn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==================== SETTINGS MODAL ==================== -->
+        <div class="modal" id="settingsModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Settings</h3>
+                    <button class="icon-btn" id="closeSettingsModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label>Auto Lock (minutes)</label>
+                        <select id="autoLockTime">
+                            <option value="0">Never</option>
+                            <option value="1">1 minute</option>
+                            <option value="5" selected>5 minutes</option>
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Thumbnail Quality</label>
+                        <select id="thumbnailQuality">
+                            <option value="low">Low (Fast)</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High (Slow)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>Enable Notifications</label>
+                        <input type="checkbox" id="notificationsToggle" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label>Clear Cache</label>
+                        <button class="btn btn-small btn-danger" id="clearCacheBtn">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CREATE ALBUM MODAL ==================== -->
+        <div class="modal" id="albumModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Album</h3>
+                    <button class="icon-btn" id="closeAlbumModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-field">
+                        <input type="text" id="albumNameInput" placeholder="Album name">
+                    </div>
+                    <div class="color-picker">
+                        <label>Album Color:</label>
+                        <div class="color-options">
+                            <button class="color-option active" data-color="#667eea"></button>
+                            <button class="color-option" data-color="#e74c3c"></button>
+                            <button class="color-option" data-color="#27ae60"></button>
+                            <button class="color-option" data-color="#f39c12"></button>
+                            <button class="color-option" data-color="#9b59b6"></button>
+                            <button class="color-option" data-color="#1abc9c"></button>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" id="saveAlbumBtn">Create Album</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cropper JS for image editing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    
+    <!-- Google API for Drive Backup -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
